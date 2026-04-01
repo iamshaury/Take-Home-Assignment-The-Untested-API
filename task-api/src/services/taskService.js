@@ -47,7 +47,13 @@ const update = (id, fields) => {
   const index = tasks.findIndex((t) => t.id === id);
   if (index === -1) return null;
 
-  const updated = { ...tasks[index], ...fields };
+  // Filter out immutable fields
+  const allowedUpdates = {};
+  ['title', 'description', 'status', 'priority', 'dueDate'].forEach((k) => {
+    if (fields[k] !== undefined) allowedUpdates[k] = fields[k];
+  });
+
+  const updated = { ...tasks[index], ...allowedUpdates };
   tasks[index] = updated;
   return updated;
 };
@@ -76,6 +82,20 @@ const completeTask = (id) => {
   return updated;
 };
 
+const assignUser = (id, assignee) => {
+  const task = findById(id);
+  if (!task) return null;
+
+  const updated = {
+    ...task,
+    assignee
+  };
+
+  const index = tasks.findIndex((t) => t.id === id);
+  tasks[index] = updated;
+  return updated;
+};
+
 const _reset = () => {
   tasks = [];
 };
@@ -90,5 +110,6 @@ module.exports = {
   update,
   remove,
   completeTask,
+  assignUser,
   _reset,
 };
